@@ -1,1 +1,6 @@
-﻿{}
+﻿{
+    "deposit":  {
+                    "version":  1,
+                    "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/deposit-v1/deposit-package.zip"
+                }
+}
