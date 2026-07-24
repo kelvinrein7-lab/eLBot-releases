@@ -1,7 +1,7 @@
 {
     "deposit":  {
-                    "version":  "1.0.17",
-                    "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/deposit-v1.0.17/deposit-package.zip"
+                    "version":  "1.0.18",
+                    "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/deposit-v1.0.18/deposit-package.zip"
                 },
     "withdraw":  {
                      "version":  "1.0.6",
