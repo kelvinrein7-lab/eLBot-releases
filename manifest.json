@@ -6,5 +6,9 @@
     "withdraw":  {
                      "version":  "1.0.10",
                      "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/withdraw-v1.0.10/withdraw-package.zip"
+                 },
+    "launcher":  {
+                     "version":  14,
+                     "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/launcher-final-14/eLBot-Setup.exe"
                  }
 }
