@@ -13,6 +13,7 @@
     },
     "kill_switch": {
         "enabled": true,
+        "valid_until": null,
         "message": ""
     }
 }
