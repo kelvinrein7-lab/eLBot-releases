@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>eLBot - Kill Switch</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px 60px; min-height: 100vh;
+    background: #14161a; color: #e8e8ea;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; justify-content: center;
+  }
+  .card { width: 100%; max-width: 440px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 14px; margin: 28px 0 0; color: #c7c7cc; }
+  .sub { color: #9a9aa2; font-size: 13px; margin-bottom: 24px; }
+  .status {
+    border-radius: 12px; padding: 16px; margin-bottom: 8px;
+    border: 1px solid #2a2d34; background: #1b1e24;
+  }
+  .status .label { font-size: 12px; color: #9a9aa2; text-transform: uppercase; letter-spacing: .04em; }
+  .status .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .value.on { color: #2ecc71; }
+  .value.off { color: #e74c3c; }
+  .value.unknown { color: #9a9aa2; }
+  .status .row { font-size: 13px; color: #c7c7cc; margin-top: 8px; }
+  .status .row b { color: #e8e8ea; }
+  .status .msg { font-size: 13px; color: #c7c7cc; margin-top: 8px; white-space: pre-wrap; }
+  label { display: block; font-size: 13px; color: #c7c7cc; margin: 14px 0 6px; }
+  input[type=password], input[type=number], textarea {
+    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #33363e;
+    background: #1b1e24; color: #e8e8ea; font-size: 15px; font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  .checkrow { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #9a9aa2; }
+  .checkrow input { width: 16px; height: 16px; }
+  .row-2 { display: flex; gap: 10px; align-items: flex-end; }
+  .row-2 > div { flex: 1; }
+  .btns { display: flex; gap: 10px; margin-top: 14px; }
+  button {
+    padding: 14px; border-radius: 10px; border: none; font-size: 14px;
+    font-weight: 700; cursor: pointer; color: white; width: 100%;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-extend { background: #2f6fed; }
+  .btn-extend:hover:not(:disabled) { background: #2559c4; }
+  .btn-clear {
+    margin-top: 8px; background: transparent; border: 1px solid #33363e;
+    color: #9a9aa2; font-weight: 500; font-size: 13px; padding: 10px;
+  }
+  .btns .btn-off { background: #c0392b; }
+  .btns .btn-off:hover:not(:disabled) { background: #992d22; }
+  .btns .btn-on { background: #219150; }
+  .btns .btn-on:hover:not(:disabled) { background: #197b43; }
+  .btn-refresh {
+    margin-top: 10px; background: transparent; border: 1px solid #33363e;
+    color: #c7c7cc; font-weight: 500;
+  }
+  .result { margin-top: 16px; font-size: 13px; padding: 12px; border-radius: 10px; display: none; white-space: pre-wrap; }
+  .result.ok { display: block; background: #12281c; color: #4fd884; border: 1px solid #1e4b32; }
+  .result.err { display: block; background: #2b1616; color: #ff8b7d; border: 1px solid #4a2320; }
+  .hint { font-size: 12px; color: #6f7078; margin-top: 26px; line-height: 1.5; }
+  hr { border: none; border-top: 1px solid #22252c; margin: 26px 0 0; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>eLBot - Kill Switch</h1>
+  <div class="sub">Kontrol jarak jauh untuk mematikan / membatasi masa aktif semua instance eLBot.</div>
+
+  <div class="status">
+    <div class="label">Status saat ini</div>
+    <div class="value unknown" id="statusValue">Memuat...</div>
+    <div class="row" id="statusValidUntil"></div>
+    <div class="msg" id="statusMsg"></div>
+  </div>
+  <button class="btn-refresh" id="refreshBtn" type="button">Refresh status</button>
+
+  <label for="token">Access Token (GitHub)</label>
+  <input type="password" id="token" placeholder="ghp_... atau github_pat_...">
+  <div class="checkrow">
+    <input type="checkbox" id="remember">
+    <label for="remember" style="margin:0;">Ingat token di device ini</label>
+  </div>
+
+  <label for="message">Pesan (opsional, ditampilkan saat app dimatikan/kadaluarsa)</label>
+  <textarea id="message" placeholder="Aplikasi dinonaktifkan sementara oleh admin."></textarea>
+
+  <h2>Perpanjang masa aktif</h2>
+  <div class="row-2">
+    <div>
+      <label for="days" style="margin-top:8px;">Aktif untuk berapa hari lagi</label>
+      <input type="number" id="days" min="1" value="30">
+    </div>
+  </div>
+  <div class="btns">
+    <button class="btn-extend" id="extendBtn" type="button">Perpanjang / Set Masa Aktif</button>
+  </div>
+  <button class="btn-clear" id="clearExpiryBtn" type="button">Hapus batas waktu (akses permanen)</button>
+
+  <h2>Kontrol cepat</h2>
+  <div class="btns">
+    <button class="btn-off" id="offBtn" type="button">MATIKAN SEMUA</button>
+    <button class="btn-on" id="onBtn" type="button">NYALAKAN KEMBALI</button>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <div class="hint">
+    Token perlu akses "Contents: Read and write" ke repo
+    kelvinrein7-lab/eLBot-releases (fine-grained personal access token).
+    Tanpa token yang benar, tombol-tombol di atas tidak akan berhasil
+    mengubah apa pun. "MATIKAN SEMUA" langsung berlaku terlepas dari
+    masa aktif yang sedang di-set; "Perpanjang" otomatis mengaktifkan
+    lagi kalau sebelumnya dimatikan.
+  </div>
+</div>
+
+<script>
+const OWNER = "kelvinrein7-lab";
+const REPO = "eLBot-releases";
+const PATH = "manifest.json";
+const API_URL = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`;
+const RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/main/${PATH}`;
+const STORAGE_KEY = "elbot_killswitch_token";
+
+const statusValue = document.getElementById("statusValue");
+const statusValidUntil = document.getElementById("statusValidUntil");
+const statusMsg = document.getElementById("statusMsg");
+const tokenInput = document.getElementById("token");
+const rememberBox = document.getElementById("remember");
+const messageInput = document.getElementById("message");
+const daysInput = document.getElementById("days");
+const extendBtn = document.getElementById("extendBtn");
+const clearExpiryBtn = document.getElementById("clearExpiryBtn");
+const offBtn = document.getElementById("offBtn");
+const onBtn = document.getElementById("onBtn");
+const refreshBtn = document.getElementById("refreshBtn");
+const resultBox = document.getElementById("result");
+
+const ALL_BUTTONS = [extendBtn, clearExpiryBtn, offBtn, onBtn];
+
+const savedToken = localStorage.getItem(STORAGE_KEY);
+if (savedToken) {
+  tokenInput.value = savedToken;
+  rememberBox.checked = true;
+}
+
+function showResult(ok, text) {
+  resultBox.className = "result " + (ok ? "ok" : "err");
+  resultBox.textContent = text;
+}
+
+function setButtonsDisabled(disabled) {
+  ALL_BUTTONS.forEach(b => { b.disabled = disabled; });
+}
+
+function b64EncodeUnicode(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+    (_, hex) => String.fromCharCode(parseInt(hex, 16))));
+}
+
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str.replace(/\n/g, "")).split("").map(
+    c => "%" + c.charCodeAt(0).toString(16).padStart(2, "0")
+  ).join(""));
+}
+
+function formatLocal(isoString) {
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return isoString;
+  return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+}
+
+async function refreshStatus() {
+  statusValue.textContent = "Memuat...";
+  statusValue.className = "value unknown";
+  statusValidUntil.textContent = "";
+  statusMsg.textContent = "";
+  try {
+    const res = await fetch(RAW_URL + "?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const manifest = await res.json();
+    const ks = manifest.kill_switch || {};
+    const enabledFlag = ks.enabled !== false;
+    const validUntil = ks.valid_until ? new Date(ks.valid_until) : null;
+    const expired = validUntil && !isNaN(validUntil.getTime()) && new Date() >= validUntil;
+    const effectivelyOn = enabledFlag && !expired;
+
+    statusValue.textContent = effectivelyOn ? "AKTIF (app boleh jalan)" : (expired ? "KADALUARSA" : "DIMATIKAN");
+    statusValue.className = "value " + (effectivelyOn ? "on" : "off");
+    statusValidUntil.innerHTML = ks.valid_until
+      ? `Berlaku sampai: <b>${formatLocal(ks.valid_until)}</b>`
+      : `Berlaku sampai: <b>tidak ada batas waktu</b>`;
+    statusMsg.textContent = ks.message || "";
+  } catch (e) {
+    statusValue.textContent = "Gagal memuat";
+    statusValue.className = "value unknown";
+    statusMsg.textContent = String(e);
+  }
+}
+
+// Reads the current manifest.json (authenticated - needed for its sha),
+// applies `mutate` to its kill_switch object in place, writes the whole
+// file back. Every button funnels through this one function so there's
+// only one place that talks to the GitHub Contents API.
+async function updateKillSwitch(mutate, confirmText) {
+  const token = tokenInput.value.trim();
+  if (!token) {
+    showResult(false, "Isi Access Token dulu.");
+    return;
+  }
+  if (confirmText && !confirm(confirmText)) return;
+
+  if (rememberBox.checked) {
+    localStorage.setItem(STORAGE_KEY, token);
+  } else {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  setButtonsDisabled(true);
+  resultBox.className = "result";
+
+  try {
+    const getRes = await fetch(API_URL, {
+      headers: { Authorization: "token " + token, Accept: "application/vnd.github+json" },
+    });
+    if (!getRes.ok) {
+      throw new Error(`Gagal ambil file (HTTP ${getRes.status}) - cek token / hak akses.`);
+    }
+    const fileData = await getRes.json();
+    const manifest = JSON.parse(b64DecodeUnicode(fileData.content));
+
+    const killSwitch = manifest.kill_switch && typeof manifest.kill_switch === "object"
+      ? manifest.kill_switch : {};
+    manifest.kill_switch = mutate(killSwitch);
+
+    const newContent = JSON.stringify(manifest, null, 4);
+    const putRes = await fetch(API_URL, {
+      method: "PUT",
+      headers: { Authorization: "token " + token, Accept: "application/vnd.github+json" },
+      body: JSON.stringify({
+        message: "Kill switch: update via control page",
+        content: b64EncodeUnicode(newContent),
+        sha: fileData.sha,
+      }),
+    });
+    if (!putRes.ok) {
+      const errBody = await putRes.json().catch(() => ({}));
+      throw new Error(errBody.message || `Gagal update (HTTP ${putRes.status})`);
+    }
+
+    showResult(true, "Berhasil disimpan.");
+    await refreshStatus();
+  } catch (e) {
+    showResult(false, String(e.message || e));
+  } finally {
+    setButtonsDisabled(false);
+  }
+}
+
+extendBtn.addEventListener("click", () => {
+  const days = parseFloat(daysInput.value);
+  if (!days || days <= 0) {
+    showResult(false, "Isi jumlah hari yang valid.");
+    return;
+  }
+  const validUntil = new Date(Date.now() + days * 86400000).toISOString();
+  updateKillSwitch(
+    ks => ({ enabled: true, valid_until: validUntil, message: messageInput.value.trim() }),
+    `Set masa aktif selama ${days} hari (sampai ${formatLocal(validUntil)})?`
+  );
+});
+
+clearExpiryBtn.addEventListener("click", () => {
+  updateKillSwitch(
+    ks => ({ enabled: ks.enabled !== false, valid_until: null, message: "" }),
+    "Hapus batas waktu - akses jadi permanen sampai dimatikan manual. Lanjutkan?"
+  );
+});
+
+offBtn.addEventListener("click", () => {
+  updateKillSwitch(
+    ks => ({ ...ks, enabled: false, message: messageInput.value.trim() }),
+    "Yakin MEMATIKAN SEMUA instance eLBot yang sedang berjalan?"
+  );
+});
+
+onBtn.addEventListener("click", () => {
+  updateKillSwitch(
+    ks => ({ ...ks, enabled: true, message: "" }),
+    "Yakin menyalakan kembali?"
+  );
+});
+
+refreshBtn.addEventListener("click", refreshStatus);
+
+refreshStatus();
+</script>
+</body>
+</html>
