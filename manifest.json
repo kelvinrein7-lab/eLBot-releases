@@ -8,8 +8,8 @@
                      "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/withdraw-v1.0.39/withdraw-package.zip"
                  },
     "launcher":  {
-                     "version":  15,
-                     "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/launcher-final-15/eLBot-Setup.exe"
+                     "version":  16,
+                     "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/launcher-final-16/eLBot-Setup.exe"
                  },
     "kill_switch":  {
                         "enabled":  true,
