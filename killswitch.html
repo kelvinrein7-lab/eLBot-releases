@@ -114,8 +114,15 @@
     kelvinrein7-lab/eLBot-releases (fine-grained personal access token).
     Tanpa token yang benar, tombol-tombol di atas tidak akan berhasil
     mengubah apa pun. "MATIKAN SEMUA" langsung berlaku terlepas dari
-    masa aktif yang sedang di-set; "Perpanjang" otomatis mengaktifkan
-    lagi kalau sebelumnya dimatikan.
+    masa aktif yang sedang di-set; "NYALAKAN KEMBALI" selalu berarti
+    aktif penuh tanpa batas waktu lagi, walau sebelumnya ada
+    "Perpanjang" yang sudah lewat.
+    <br><br>
+    Status di halaman ini selalu real-time. Tapi aplikasi eLBot yang
+    sedang berjalan membaca dari sumber lain yang sempat di-cache
+    beberapa menit oleh GitHub - jadi walau halaman ini sudah
+    menunjukkan status terbaru, instance yang sedang jalan bisa butuh
+    beberapa menit lagi untuk benar-benar menyadarinya.
   </div>
 </div>
 
@@ -181,9 +188,21 @@ async function refreshStatus() {
   statusValidUntil.textContent = "";
   statusMsg.textContent = "";
   try {
-    const res = await fetch(RAW_URL + "?t=" + Date.now(), { cache: "no-store" });
+    // Deliberately the Contents API (API_URL), NOT raw.githubusercontent.com
+    // (RAW_URL) - confirmed live, raw.githubusercontent.com sits behind a
+    // CDN that can serve a stale copy for several minutes after a write,
+    // and appending a cache-busting query string does NOT bypass it (the
+    // CDN caches by path, not full URL). The Contents API reads straight
+    // from git with no such cache, so this always reflects the real,
+    // just-written state instantly - it's ONLY the running eLBot app's
+    // OWN background poll (ui/main_window.py, which deliberately uses
+    // raw.githubusercontent.com instead, to stay unauthenticated and
+    // avoid the Contents API's stricter rate limit) that still lags by
+    // however long that CDN takes to catch up, same as before.
+    const res = await fetch(API_URL, { headers: { Accept: "application/vnd.github+json" } });
     if (!res.ok) throw new Error("HTTP " + res.status);
-    const manifest = await res.json();
+    const fileData = await res.json();
+    const manifest = JSON.parse(b64DecodeUnicode(fileData.content));
     const ks = manifest.kill_switch || {};
     const enabledFlag = ks.enabled !== false;
     const validUntil = ks.valid_until ? new Date(ks.valid_until) : null;
@@ -290,8 +309,14 @@ offBtn.addEventListener("click", () => {
 });
 
 onBtn.addEventListener("click", () => {
+  // Deliberately does NOT spread the previous kill_switch object -
+  // confirmed live, a leftover valid_until from an earlier "Perpanjang"
+  // that had since passed kept the app treating access as expired even
+  // after this button successfully set enabled:true, since the app
+  // checks both independently (see _kill_switch_shutdown_message).
+  // "Nyalakan kembali" must mean fully back on, no lingering conditions.
   updateKillSwitch(
-    ks => ({ ...ks, enabled: true, message: "" }),
+    () => ({ enabled: true, valid_until: null, message: "" }),
     "Yakin menyalakan kembali?"
   );
 });
