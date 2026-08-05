@@ -10,5 +10,9 @@
     "launcher":  {
                      "version":  15,
                      "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/launcher-final-15/eLBot-Setup.exe"
-                 }
+                 },
+    "kill_switch":  {
+                        "enabled":  true,
+                        "message":  ""
+                    }
 }
