@@ -1,19 +1,19 @@
 {
-    "deposit": {
-        "version": "1.0.22",
-        "url": "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/deposit-v1.0.22/deposit-package.zip"
-    },
-    "withdraw": {
-        "version": "1.0.41",
-        "url": "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/withdraw-v1.0.41/withdraw-package.zip"
-    },
-    "launcher": {
-        "version": 17,
-        "url": "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/launcher-final-17/eLBot-Setup.exe"
-    },
-    "kill_switch": {
-        "enabled": true,
-        "valid_until": null,
-        "message": ""
-    }
+    "deposit":  {
+                    "version":  "1.0.22",
+                    "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/deposit-v1.0.22/deposit-package.zip"
+                },
+    "withdraw":  {
+                     "version":  "1.0.41",
+                     "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/withdraw-v1.0.41/withdraw-package.zip"
+                 },
+    "launcher":  {
+                     "version":  18,
+                     "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/launcher-final-18/eLBot-Setup.exe"
+                 },
+    "kill_switch":  {
+                        "enabled":  true,
+                        "valid_until":  null,
+                        "message":  ""
+                    }
 }
