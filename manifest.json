@@ -12,7 +12,7 @@
         "url": "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/launcher-final-17/eLBot-Setup.exe"
     },
     "kill_switch": {
-        "enabled": false,
+        "enabled": true,
         "message": ""
     }
 }
