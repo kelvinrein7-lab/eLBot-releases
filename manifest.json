@@ -4,8 +4,8 @@
                     "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/deposit-v1.0.23/deposit-package.zip"
                 },
     "withdraw":  {
-                     "version":  "1.0.71",
-                     "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/withdraw-v1.0.71/withdraw-package.zip"
+                     "version":  "1.0.72",
+                     "url":  "https://github.com/kelvinrein7-lab/eLBot-releases/releases/download/withdraw-v1.0.72/withdraw-package.zip"
                  },
     "launcher":  {
                      "version":  18,
